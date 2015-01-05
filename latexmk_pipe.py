@@ -43,26 +43,25 @@ if __name__ == '__main__':
         path.insert(0, initial_dir)
         os.chdir(place)
 
-    src = make_name()
+    filename = make_name()
+    src = filename + ".tex"
 
     try:
-        srcfile = open(src + ".tex", 'w')
+        srcfile = open(src, 'w')
     except IOError:
         logging.critical("cannot create temporary files!")
         sys.exit(1)
 
-    logging.info("temporary file used is " + src + ".tex")
+    logging.info("temporary file is " + src)
     dump_file(sys.stdin, srcfile)
+    srcfile.close()
 
     # call latexmk with options
     options = ' '.join(sys.argv[1:])
 
     try:
-        subprocess.check_call("latexmk " + options + src + ".tex",
+        subprocess.check_call("latexmk " + options + " " + src,
                               stdin=None, shell=True)
     except subprocess.CalledProcessError:
         logging.critical("problem with latexmk!")
         sys.exit(1)
-
-    # clean
-    srcfile.close()
