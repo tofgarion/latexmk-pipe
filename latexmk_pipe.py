@@ -2,6 +2,7 @@
 
 """A simple script to be able to use latexmk through pipes. Inspired from rubber-pipe."""
 
+import glob
 import logging
 import os
 import re
@@ -79,3 +80,7 @@ if __name__ == '__main__':
 
     for byte in output_file:
         sys.stdout.buffer.write(byte)
+
+    # clean temporary files
+    for temp_file in glob.glob(filename + "*"):
+        os.remove(temp_file)
