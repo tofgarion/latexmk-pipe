@@ -47,21 +47,35 @@ if __name__ == '__main__':
     src = filename + ".tex"
 
     try:
-        srcfile = open(src, 'w')
+        src_file = open(src, 'w')
     except IOError:
         logging.critical("cannot create temporary files!")
         sys.exit(1)
 
     logging.info("temporary file is " + src)
-    dump_file(sys.stdin, srcfile)
-    srcfile.close()
+    dump_file(sys.stdin, src_file)
+    src_file.close()
 
     # call latexmk with options
     options = ' '.join(sys.argv[1:])
 
     try:
         subprocess.check_call("latexmk " + options + " " + src,
-                              stdin=None, shell=True)
+                              stdin=None,
+                              stdout=sys.stderr.buffer,
+                              shell=True)
     except subprocess.CalledProcessError:
         logging.critical("problem with latexmk!")
         sys.exit(1)
+
+    # dump output file on standard output
+    log_file = open(filename + ".log", 'r')
+    print(log_file)
+    log_text = log_file.read()
+    log_file.close()
+
+    output_file_pattern = re.compile(r"Output written on (\w+\.\w+).*")
+    output_file = open(output_file_pattern.search(log_text).group(1), 'rb')
+
+    for byte in output_file:
+        sys.stdout.buffer.write(byte)
