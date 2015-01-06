@@ -33,29 +33,17 @@ def dump_file (f_in, f_out):
 if __name__ == '__main__':
 
     path = []
-    place = "."
     initial_dir = os.getcwd()
 
     logging.basicConfig(level=logging.INFO)
 
     # create temporary file
-
-    if place is not None and place != ".":
-        path.insert(0, initial_dir)
-        os.chdir(place)
-
     filename = make_name()
     src = filename + ".tex"
 
-    try:
-        src_file = open(src, 'w')
-    except IOError:
-        logging.critical("cannot create temporary files!")
-        sys.exit(1)
-
-    logging.info("temporary file is " + src)
-    dump_file(sys.stdin, src_file)
-    src_file.close()
+    with open(src, 'w') as src_file:
+        logging.info("temporary file is " + src)
+        dump_file(sys.stdin, src_file)
 
     # call latexmk with options
     options = ' '.join(sys.argv[1:])
@@ -70,16 +58,15 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # dump output file on standard output
-    log_file = open(filename + ".log", 'r')
-    print(log_file)
-    log_text = log_file.read()
-    log_file.close()
+    with  open(filename + ".log", 'r') as log_file:
+        print(log_file)
+        log_text = log_file.read()
 
     output_file_pattern = re.compile(r"Output written on (\w+\.\w+).*")
-    output_file = open(output_file_pattern.search(log_text).group(1), 'rb')
 
-    for byte in output_file:
-        sys.stdout.buffer.write(byte)
+    with open(output_file_pattern.search(log_text).group(1), 'rb') as output_file:
+        for byte in output_file:
+            sys.stdout.buffer.write(byte)
 
     # clean temporary files
     for temp_file in glob.glob(filename + "*"):
