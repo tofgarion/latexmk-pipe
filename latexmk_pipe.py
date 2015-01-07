@@ -58,7 +58,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # dump output file on standard output
-    with  open(filename + ".log", 'r') as log_file:
+    with open(filename + ".log", 'r', encoding='latin1') as log_file:
         print(log_file)
         log_text = log_file.read()
 
