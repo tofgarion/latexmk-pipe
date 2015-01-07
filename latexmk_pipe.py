@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-"""A simple script to be able to use latexmk through pipes. Inspired from rubber-pipe."""
+"""A simple script to be able to use latexmk through pipes. Inspired
+from rubber-pipe."""
 
 import glob
 import logging
@@ -9,31 +10,29 @@ import re
 import subprocess
 import sys
 
-re_latexmktmp = re.compile("latexmktmp(?P<num>[0-9]+)\\.")
+RE_LATEXMKTMP = re.compile("latexmktmp(?P<num>[0-9]+)\\.")
 
-def make_name ():
+def make_name():
     """Return a base name suitable for a new compilation in the current
     directory. The name will have the form "latexmktmp" plus a number,
-	such that no file of this prefix exists.
-	"""
+    such that no file of this prefix exists."""
+
     num = 0
     for my_file in os.listdir("."):
-        m = re_latexmktmp.match(my_file)
-        if m:
-            num = max(num, int(m.group("num")) + 1)
+        my_match = RE_LATEXMKTMP.match(my_file)
+        if my_match:
+            num = max(num, int(my_match.group("num")) + 1)
     return "latexmktmp%d" % num
 
-def dump_file (f_in, f_out):
-    """
-	Dump the contents of a file object into another.
-	"""
+def dump_file(f_in, f_out):
+    """Dump the contents of a file object into another."""
+
     for line in f_in.readlines():
         f_out.write(line)
 
-if __name__ == '__main__':
-
-    path = []
-    initial_dir = os.getcwd()
+def call_latexmk():
+    """Create temporary LaTeX file, call latexmk and clean temporary
+    files."""
 
     logging.basicConfig(level=logging.INFO)
 
@@ -59,15 +58,19 @@ if __name__ == '__main__':
 
     # dump output file on standard output
     with open(filename + ".log", 'r', encoding='latin1') as log_file:
-        print(log_file)
         log_text = log_file.read()
 
     output_file_pattern = re.compile(r"Output written on (\w+\.\w+).*")
 
-    with open(output_file_pattern.search(log_text).group(1), 'rb') as output_file:
+    with open(output_file_pattern.search(log_text).group(1),
+              'rb') as output_file:
         for byte in output_file:
             sys.stdout.buffer.write(byte)
 
     # clean temporary files
     for temp_file in glob.glob(filename + "*"):
         os.remove(temp_file)
+
+if __name__ == '__main__':
+
+    call_latexmk()
