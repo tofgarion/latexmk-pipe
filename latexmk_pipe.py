@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 """A simple script to be able to use latexmk through pipes. Inspired
-from rubber-pipe."""
+by rubber-pipe."""
 
 import glob
 import logging
