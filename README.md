@@ -7,4 +7,4 @@ You can use it to pass options "on the fly" to an existing LaTeX file. For insta
 echo "\PassOptionsToClass{answers,grades}{exam} \input{exam150128.tex} | latexmk-pipe > exam150128.sol.pdf
 ```
 
-Temporary files are deleted if no errors are produced during the compilation process.
+Temporary files are deleted if no errors are produced during the compilation process. The `-outdir` option can now be used.
