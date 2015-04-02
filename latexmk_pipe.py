@@ -13,6 +13,7 @@ import sys
 RE_LATEXMKTMP = re.compile("latexmktmp(?P<num>[0-9]+)\\.")
 RE_OUTDIR = re.compile("-outdir=(.*)")
 
+
 def make_name(output):
     """Return a base name suitable for a new compilation in the output
     directory. The name will have the form "latexmktmp" plus a number,
@@ -25,11 +26,13 @@ def make_name(output):
             num = max(num, int(my_match.group("num")) + 1)
     return "latexmktmp%d" % num
 
+
 def dump_file(f_in, f_out):
     """Dump the contents of a file object into another."""
 
     for line in f_in.readlines():
         f_out.write(line)
+
 
 def call_latexmk():
     """Create temporary LaTeX file, call latexmk and clean temporary
