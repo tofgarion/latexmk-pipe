@@ -11,14 +11,15 @@ import subprocess
 import sys
 
 RE_LATEXMKTMP = re.compile("latexmktmp(?P<num>[0-9]+)\\.")
+RE_OUTDIR = re.compile("-outdir=(.*)")
 
-def make_name():
-    """Return a base name suitable for a new compilation in the current
+def make_name(output):
+    """Return a base name suitable for a new compilation in the output
     directory. The name will have the form "latexmktmp" plus a number,
     such that no file of this prefix exists."""
 
     num = 0
-    for my_file in os.listdir("."):
+    for my_file in os.listdir(output):
         my_match = RE_LATEXMKTMP.match(my_file)
         if my_match:
             num = max(num, int(my_match.group("num")) + 1)
@@ -35,18 +36,26 @@ def call_latexmk():
     files."""
 
     logging.basicConfig(level=logging.INFO)
+    output = "." + os.sep
+
+    # find options, particularly -output=DIR option
+    for option in sys.argv[1:]:
+        match = RE_OUTDIR.match(option)
+        if match:
+            output = match.group(1) + os.sep
+            logging.info("output dir is " + output)
+
+    options = ' '.join(sys.argv[1:])
 
     # create temporary file
-    filename = make_name()
-    src = filename + ".tex"
+    filename = make_name(output)
+    src = output + filename + ".tex"
 
     with open(src, 'w') as src_file:
         logging.info("temporary file is " + src)
         dump_file(sys.stdin, src_file)
 
     # call latexmk with options
-    options = ' '.join(sys.argv[1:])
-
     try:
         subprocess.check_call("latexmk " + options + " " + src,
                               stdin=None,
@@ -57,10 +66,11 @@ def call_latexmk():
         sys.exit(1)
 
     # dump output file on standard output
-    with open(filename + ".log", 'r', encoding='latin1') as log_file:
+    with open(output + filename + ".log", 'r', encoding='latin1') as log_file:
         log_text = log_file.read()
 
-    output_file_pattern = re.compile(r"Output written on (\w+\.\w+).*")
+    output_file_pattern = re.compile(r"Output written on (" + output +
+                                     "*\w+\.\w+).*")
 
     with open(output_file_pattern.search(log_text).group(1),
               'rb') as output_file:
@@ -68,7 +78,7 @@ def call_latexmk():
             sys.stdout.buffer.write(byte)
 
     # clean temporary files
-    for temp_file in glob.glob(filename + "*"):
+    for temp_file in glob.glob(output + filename + "*"):
         os.remove(temp_file)
 
 if __name__ == '__main__':
