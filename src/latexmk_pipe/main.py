@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 """A simple script to be able to use latexmk through pipes. Inspired
 by rubber-pipe."""
 
@@ -84,6 +82,6 @@ def call_latexmk():
     for temp_file in glob.glob(output + filename + "*"):
         os.remove(temp_file)
 
-if __name__ == '__main__':
 
+def main():
     call_latexmk()
